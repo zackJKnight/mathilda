@@ -1,0 +1,32 @@
+# Project Todo
+## (Part of the full TODO list for WishLily)
+
+- [ ] Phase One
+  - [ ] Mathilda web scraper
+    - [ ] Etsy
+      - [X] Scrape Results
+      - [ ] Product info as JSON
+      - [ ] Proxy/CDN product photos
+    - [ ] Amazon
+      - [ ] Scrape Results
+      - [ ] Product info as JSON
+      - [ ] Proxy/CDN product photos
+    - [ ] Target
+      - [ ] Scrape Results
+      - [ ] Product info as JSON
+      - [ ] Proxy/CDN product photos
+    - [ ] Walmart
+      - [ ] Scrape Results
+      - [ ] Product info as JSON
+      - [ ] Proxy/CDN product photos
+    - [ ] Best Buy
+      - [ ] Scrape Results
+      - [ ] Product info as JSON
+      - [ ] Proxy/CDN product photos
+    - [ ] Barnes & Noble
+      - [ ] Scrape Results
+      - [ ] Product info as JSON
+      - [ ] Proxy/CDN product photos
+    - [ ] Generic links
+      - [ ] Product (embed) info as JSON
+      - [ ] Proxy/CDN product photos
