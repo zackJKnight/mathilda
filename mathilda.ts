@@ -35,7 +35,7 @@ router.get("/etsy/search", async (ctx) => {
       let title = productinfo.getElementsByClassName('v2-listing-card__title')[0].textContent.replace('\\n', '').trim()
       let cover = link.getElementsByClassName('wt-width-full')[0].outerHTML.match(/src="(.*?)"/)[1]
       let price = productinfo.getElementsByClassName("currency-symbol")[0].textContent + productinfo.getElementsByClassName("currency-value")[0].textContent
-      let buyLink = link.outerHTML.match(/href="(.*?)"/)[1]
+      let buyLink = link.outerHTML.match(/href="(.*?)\?.*?"/)[1]
 
       resultsJSON.push({
         title,
