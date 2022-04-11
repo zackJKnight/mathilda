@@ -30,3 +30,5 @@
     - [ ] Generic links
       - [ ] Product (embed) info as JSON
       - [ ] Proxy/CDN product photos
+- [ ] Phase Two
+  - [ ] Add affiliate links

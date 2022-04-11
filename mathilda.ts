@@ -3,12 +3,19 @@ import { DOMParser } from 'https://deno.land/x/deno_dom@v0.1.22-alpha/deno-dom-w
 
 let cache: Map<string, string> = new Map()
 
-async function cfetch(url: string): Promise<string> {
-  if (cache.has(url)) {
-    return cache.get(url) ?? ''
+async function cfetch(url: string, lang: string): Promise<string> {
+  if (cache.has(lang + url)) {
+    return cache.get(lang + url) ?? ''
   } else {
-    let text = await (await fetch(url)).text()
-    cache.set(url, text)
+    let text = await (await fetch(
+      url,
+      {
+        headers: {
+          'Accept-Language': lang,
+        }
+      }
+    )).text()
+    cache.set(lang + url, text)
     return text
   }
 }
@@ -24,8 +31,9 @@ router.get("/", (ctx) => {
 
 router.get("/etsy/search", async (ctx) => {
   try {
+    const lang = ctx.request.headers.get('Accept-Language')
     const query = ctx.request.url.searchParams.get('q')
-    const results = await cfetch(`https://etsy.com/search?q=${query}`)
+    const results = await cfetch(`https://etsy.com/search?q=${query}`, lang ?? 'en-US,en;q=0.5')
     const document: any = new DOMParser().parseFromString(results, 'text/html');
     const links = document.getElementsByClassName('v2-listing-card')
 
