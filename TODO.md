@@ -3,10 +3,10 @@
 
 - [ ] Phase One
   - [ ] Mathilda web scraper
-    - [ ] Etsy
+    - [X] Etsy
       - [X] Scrape Results
-      - [ ] Product info as JSON
-      - [ ] Proxy/CDN product photos
+      - [X] Product info as JSON
+      - [X] Proxy/CDN product photos
     - [ ] Amazon
       - [ ] Scrape Results
       - [ ] Product info as JSON

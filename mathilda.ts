@@ -48,13 +48,43 @@ router.get("/etsy/search", async (ctx) => {
       resultsJSON.push({
         title,
         price,
-        cover,
+        cover: `https://imagecdn.app/v2/image/${encodeURI(cover.replace('?', ''))}?width=400&height=200&format=webp&fit=cover`,
         link: buyLink,
+        id: buyLink.match(/.*?listing\/(.*)/)[1]
       })
     }
 
     ctx.response.body = {
       message: resultsJSON,
+      success: true,
+    }
+  } catch (e) {
+    console.log(e)
+    ctx.response.body = {
+      message: 'Internal error occurred.',
+      success: false,
+    }
+    ctx.response.status = Status.InternalServerError
+  }
+})
+
+router.get("/etsy/product", async (ctx) => {
+  try {
+    const lang = ctx.request.headers.get('Accept-Language')
+    const id = ctx.request.url.searchParams.get('id')
+    const results = await cfetch(`https://etsy.com/listing/${id}`, lang ?? 'en-US,en;q=0.5')
+
+    const document: any = new DOMParser().parseFromString(results, 'text/html');
+    const description = document.getElementById('listing-page-cart')
+    const cover = document.querySelector('img.wt-max-width-full').outerHTML.match(/src=\\?"(.*?)\\?"/)[1]
+    const title = description.getElementsByClassName('wt-text-body-03')[0].textContent.replace('\\n', '').trim()
+    const price = description.getElementsByClassName('wt-mr-xs-2')[0].textContent.replace('\\n', '').trim()
+
+    ctx.response.body = {
+      title,
+      price,
+      cover: `https://imagecdn.app/v2/image/${encodeURI(cover.replace('?', ''))}?width=400&height=200&format=webp&fit=cover`,
+      link: `https://etsy.com/listing/${id}`,
       success: true,
     }
   } catch (e) {
