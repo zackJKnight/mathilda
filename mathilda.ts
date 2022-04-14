@@ -180,6 +180,19 @@ router.get("/generic/product", async (ctx) => {
     const lang = ctx.request.headers.get('Accept-Language')
     const id = ctx.request.url.searchParams.get('id')
     if (id?.includes('proxy.wishlily.app') || id?.includes('deno.dev')) throw new Error('Infinite proxy loop!')
+
+    //http://localhost:8080/generic/product?id=https://amazon.com/Victrola-Nostalgic-Bluetooth-Turntable-Entertainment/dp/B00NQL8Z16
+    // Handle known link types (a little sloppy but it shouldn't really matter)
+    console.log(id)
+    if (id?.includes('amazon.com')) {
+      ctx.response.redirect(`https://proxy.wishlily.app/amazon/product?id=${id.match(/https?:\/\/w?w?w?.?amazon\.com\/(.*?\/dp\/[0-9A-Za-z]{10}).*/)?.[1]}`)
+      return
+    }
+    if (id?.includes('etsy.com')) {
+      ctx.response.redirect(`https://proxy.wishlily.app/etsy/product?id=${((id + '?').replace(/\/$/, "")).match(/https?:\/\/w?w?w?.?etsy\.com\/(.*?)\?.*/)?.[1]}`)
+      return
+    }
+
     const results = await cfetch(`${id}`, lang ?? 'en-US,en;q=0.5')
 
     const document: any = new DOMParser().parseFromString(results, 'text/html');
