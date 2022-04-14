@@ -218,7 +218,7 @@ router.get("/generic/product", async (ctx) => {
 })
 
 const app = new Application()
-app.use(CORS('*'))
+app.use(CORS())
 app.use(router.routes())
 app.use(router.allowedMethods())
 
