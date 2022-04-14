@@ -204,6 +204,8 @@ router.get("/generic/product", async (ctx) => {
     const cover = getMeta(document, 'og:image') ?? getMeta(document, 'twitter:image:src')
     const title = getMeta(document, 'og:title') ?? getMeta(document, 'twitter:title')
 
+    if(cover === undefined || title === undefined) throw new Error('Unable to parse meta.')
+
     ctx.response.body = {
       title,
       price: '???',
