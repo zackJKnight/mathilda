@@ -27,8 +27,8 @@
       - [ ] Scrape Results
       - [ ] Product info as JSON
       - [ ] Proxy/CDN product photos
-    - [ ] Generic links
-      - [ ] Product (embed) info as JSON
-      - [ ] Proxy/CDN product photos
+    - [X] Generic links
+      - [X] Product (embed) info as JSON
+      - [X] Proxy/CDN product photos
 - [ ] Phase Two
   - [ ] Add affiliate links

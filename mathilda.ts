@@ -1,5 +1,5 @@
 import { Application, Router, Status } from 'https://deno.land/x/oak@v10.5.1/mod.ts'
-import { DOMParser } from 'https://deno.land/x/deno_dom@v0.1.22-alpha/deno-dom-wasm.ts';
+import { DOMParser, HTMLDocument } from 'https://deno.land/x/deno_dom@v0.1.22-alpha/deno-dom-wasm.ts';
 
 let cache: Map<string, string> = new Map()
 
@@ -18,6 +18,12 @@ async function cfetch(url: string, lang: string): Promise<string> {
     cache.set(lang + url, text)
     return text
   }
+}
+
+function getMeta(document: HTMLDocument, name: string) : string | undefined {
+  const byName = document.querySelector(`meta[name=\"${name}\"]`)?.outerHTML.match(/content=\\?"(.*?)\\?"/)?.[1]
+  const byProperty = document.querySelector(`meta[name=\"${name}\"]`)?.outerHTML.match(/content=\\?"(.*?)\\?"/)?.[1]
+  return byName ?? byProperty
 }
 
 const router = new Router()
@@ -157,6 +163,34 @@ router.get("/amazon/product", async (ctx) => {
       price,
       cover: `https://imagecdn.app/v2/image/${encodeURI(cover.replace('?', ''))}?width=400&height=200&format=webp&fit=cover`,
       link: `https://amazon.com/${id}`,
+      success: true,
+    }
+  } catch (e) {
+    console.log(e)
+    ctx.response.body = {
+      message: 'Internal error occurred.',
+      success: false,
+    }
+    ctx.response.status = Status.InternalServerError
+  }
+})
+
+router.get("/generic/product", async (ctx) => {
+  try {
+    const lang = ctx.request.headers.get('Accept-Language')
+    const id = ctx.request.url.searchParams.get('id')
+    if (id?.includes('proxy.wishlily.app') || id?.includes('deno.dev')) throw new Error('Infinite proxy loop!')
+    const results = await cfetch(`${id}`, lang ?? 'en-US,en;q=0.5')
+
+    const document: any = new DOMParser().parseFromString(results, 'text/html');
+    const cover = getMeta(document, 'og:image') ?? getMeta(document, 'twitter:image:src')
+    const title = getMeta(document, 'og:title') ?? getMeta(document, 'twitter:title')
+
+    ctx.response.body = {
+      title,
+      price: '???',
+      cover: `https://imagecdn.app/v2/image/${encodeURI(cover?.replace('?', '') ?? '')}?width=400&height=200&format=webp&fit=cover`,
+      link: `${id}`,
       success: true,
     }
   } catch (e) {
