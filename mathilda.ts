@@ -23,7 +23,7 @@ async function cfetch(url: string, lang: string): Promise<string> {
 
 function getMeta(document: HTMLDocument, name: string) : string | undefined {
   const byName = document.querySelector(`meta[name=\"${name}\"]`)?.outerHTML.match(/content=\\?"(.*?)\\?"/)?.[1]
-  const byProperty = document.querySelector(`meta[name=\"${name}\"]`)?.outerHTML.match(/content=\\?"(.*?)\\?"/)?.[1]
+  const byProperty = document.querySelector(`meta[property=\"${name}\"]`)?.outerHTML.match(/content=\\?"(.*?)\\?"/)?.[1]
   return byName ?? byProperty
 }
 
