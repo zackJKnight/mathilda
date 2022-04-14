@@ -7,10 +7,10 @@
       - [X] Scrape Results
       - [X] Product info as JSON
       - [X] Proxy/CDN product photos
-    - [ ] Amazon
+    - [X] Amazon
       - [X] Scrape Results
-      - [ ] Product info as JSON
-      - [ ] Proxy/CDN product photos
+      - [X] Product info as JSON
+      - [X] Proxy/CDN product photos
     - [ ] Target
       - [ ] Scrape Results
       - [ ] Product info as JSON
