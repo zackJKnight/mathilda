@@ -1,5 +1,6 @@
 import { Application, Router, Status } from 'https://deno.land/x/oak@v10.5.1/mod.ts'
 import { DOMParser, HTMLDocument } from 'https://deno.land/x/deno_dom@v0.1.22-alpha/deno-dom-wasm.ts';
+import { CORS } from "https://deno.land/x/oak_cors/mod.ts";
 
 let cache: Map<string, string> = new Map()
 
@@ -217,6 +218,7 @@ router.get("/generic/product", async (ctx) => {
 })
 
 const app = new Application()
+app.use(CORS('*'))
 app.use(router.routes())
 app.use(router.allowedMethods())
 
