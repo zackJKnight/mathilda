@@ -97,12 +97,55 @@ router.get("/etsy/product", async (ctx) => {
   }
 })
 
+router.get("/amazon/search", async (ctx) => {
+  try {
+    const lang = ctx.request.headers.get('Accept-Language')
+    const query = ctx.request.url.searchParams.get('q')?.replace(' ', '+')
+    const results = await cfetch(`https://amazon.com/s?k=${query}`, lang ?? 'en-US,en;q=0.5')
+    const document: any = new DOMParser().parseFromString(results, 'text/html');
+    const links = document.getElementsByClassName('a-section a-spacing-base')
+
+    let resultsJSON = []
+    for (let link of links) {
+      const productinfo = link.getElementsByClassName('a-section a-spacing-small s-padding-left-small s-padding-right-small')[0]
+      let titleEl = productinfo.getElementsByClassName('a-section a-spacing-none a-spacing-top-small s-title-instructions-style')[0]
+      let title = titleEl.getElementsByClassName('a-size-base-plus a-color-base a-text-normal')[0].textContent.replace('\\n', '').trim()
+      let cover = link.getElementsByClassName('s-image')[0].outerHTML.match(/src="(.*?)"/)[1]
+      let price = productinfo.getElementsByClassName("a-price-symbol")[0].textContent + productinfo.getElementsByClassName("a-price-whole")[0].textContent + productinfo.getElementsByClassName("a-price-fraction")[0].textContent
+      let buyLink = titleEl.getElementsByClassName('a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal')[0].outerHTML.match(/href="(.*?)\?.*?"/)[1]
+
+      if (title && cover && price && buyLink && !buyLink.startsWith('/gp/')) {
+        resultsJSON.push({
+          title,
+          price,
+          cover: `https://imagecdn.app/v2/image/${encodeURI(cover.replace('?', ''))}?width=400&height=200&format=webp&fit=cover`,
+          link: `https://amazon.com${buyLink}`.match(/(.*?)\/ref=.*/)?.[1] ?? `https://amazon.com${buyLink}`,
+          id: buyLink.match(/(.*?)\/ref=.*/)[1]
+        })
+        console.log(buyLink)
+      }
+    }
+
+    ctx.response.body = {
+      message: resultsJSON,
+      success: true,
+    }
+  } catch (e) {
+    console.log(e)
+    ctx.response.body = {
+      message: 'Internal error occurred.',
+      success: false,
+    }
+    ctx.response.status = Status.InternalServerError
+  }
+})
+
 const app = new Application()
 app.use(router.routes())
 app.use(router.allowedMethods())
 
 app.addEventListener(
-  "listen",
+  'listen',
   (e) => console.log('Listening on http://localhost:8080'),
 )
 await app.listen({ port: 8080 })
