@@ -148,7 +148,7 @@ router.get("/amazon/search", async (ctx) => {
 })
 
 router.get("/amazon/product", async (ctx) => {
-  try {
+  // try {
     const lang = ctx.request.headers.get('Accept-Language')
     const id = ctx.request.url.searchParams.get('id')
     const results = await cfetch(`https://amazon.com/${id}`, lang ?? 'en-US,en;q=0.5')
@@ -157,7 +157,12 @@ router.get("/amazon/product", async (ctx) => {
     const cover = document.getElementById('landingImage').outerHTML.match(/src=\\?"(.*?)\\?"/)[1]
     const title = document.getElementById('productTitle').textContent.replace('\\n', '').trim()
     const priceEl = document.getElementsByClassName('a-price aok-align-center reinventPricePriceToPayMargin priceToPay')[0]
-    const price = priceEl.getElementsByClassName("a-price-symbol")[0].textContent + priceEl.getElementsByClassName("a-price-whole")[0].textContent + priceEl.getElementsByClassName("a-price-fraction")[0].textContent
+    let price: string = '???'
+    if (priceEl) {
+      price = priceEl.getElementsByClassName("a-price-symbol")[0].textContent + priceEl.getElementsByClassName("a-price-whole")[0].textContent + priceEl.getElementsByClassName("a-price-fraction")[0].textContent
+    } else {
+      price = document.getElementsByClassName('a-price a-text-price a-size-medium apexPriceToPay')[0].getElementsByClassName('a-offscreen')[0].textContent
+    }
 
     ctx.response.body = {
       title,
@@ -166,14 +171,14 @@ router.get("/amazon/product", async (ctx) => {
       link: `https://amazon.com/${id}`,
       success: true,
     }
-  } catch (e) {
-    console.log(e)
-    ctx.response.body = {
-      message: 'Internal error occurred.',
-      success: false,
-    }
-    ctx.response.status = Status.InternalServerError
-  }
+  // } catch (e) {
+  //   console.log(e)
+  //   ctx.response.body = {
+  //     message: 'Internal error occurred.',
+  //     success: false,
+  //   }
+  //   ctx.response.status = Status.InternalServerError
+  // }
 })
 
 router.get("/generic/product", async (ctx) => {
@@ -184,7 +189,6 @@ router.get("/generic/product", async (ctx) => {
 
     //http://localhost:8080/generic/product?id=https://amazon.com/Victrola-Nostalgic-Bluetooth-Turntable-Entertainment/dp/B00NQL8Z16
     // Handle known link types (a little sloppy but it shouldn't really matter)
-    console.log(id)
     if (id?.includes('amazon.com')) {
       ctx.response.redirect(`https://proxy.wishlily.app/amazon/product?id=${id.match(/https?:\/\/w?w?w?.?amazon\.com\/(.*?\/dp\/[0-9A-Za-z]{10}).*/)?.[1]}`)
       return
