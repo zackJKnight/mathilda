@@ -148,7 +148,7 @@ router.get("/amazon/search", async (ctx) => {
 })
 
 router.get("/amazon/product", async (ctx) => {
-  // try {
+  try {
     const lang = ctx.request.headers.get('Accept-Language')
     const id = ctx.request.url.searchParams.get('id')
     const results = await cfetch(`https://amazon.com/${id}`, lang ?? 'en-US,en;q=0.5')
@@ -167,18 +167,18 @@ router.get("/amazon/product", async (ctx) => {
     ctx.response.body = {
       title,
       price,
-      cover: `https://imagecdn.app/v2/image/${encodeURI(cover.replace('?', ''))}?width=400&height=200&format=webp&fit=cover`,
+      cover,
       link: `https://amazon.com/${id}`,
       success: true,
     }
-  // } catch (e) {
-  //   console.log(e)
-  //   ctx.response.body = {
-  //     message: 'Internal error occurred.',
-  //     success: false,
-  //   }
-  //   ctx.response.status = Status.InternalServerError
-  // }
+  } catch (e) {
+    console.log(e)
+    ctx.response.body = {
+      message: 'Internal error occurred.',
+      success: false,
+    }
+    ctx.response.status = Status.InternalServerError
+  }
 })
 
 router.get("/generic/product", async (ctx) => {
