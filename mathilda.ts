@@ -210,7 +210,7 @@ router.get("/generic/product", async (ctx) => {
       title,
       price: '???',
       cover,
-      link: id.toString(),
+      link: id?.toString() ?? 'https://wishlily.app/',
       success: true,
     }
   } catch (e) {
