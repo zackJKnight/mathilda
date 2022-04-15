@@ -55,7 +55,7 @@ router.get("/etsy/search", async (ctx) => {
       resultsJSON.push({
         title,
         price,
-        cover: `https://imagecdn.app/v2/image/${encodeURI(cover.replace('?', ''))}?width=400&height=200&format=webp&fit=cover`,
+        cover,
         link: buyLink,
         id: buyLink.match(/.*?listing\/(.*)/)[1]
       })
@@ -90,7 +90,7 @@ router.get("/etsy/product", async (ctx) => {
     ctx.response.body = {
       title,
       price,
-      cover: `https://imagecdn.app/v2/image/${encodeURI(cover.replace('?', ''))}?width=400&height=200&format=webp&fit=cover`,
+      cover,
       link: `https://etsy.com/listing/${id}`,
       success: true,
     }
@@ -209,8 +209,8 @@ router.get("/generic/product", async (ctx) => {
     ctx.response.body = {
       title,
       price: '???',
-      cover: `https://imagecdn.app/v2/image/${encodeURI(cover?.replace('?', '') ?? '')}?width=400&height=200&format=webp&fit=cover`,
-      link: `${id}`,
+      cover,
+      link: id.toString(),
       success: true,
     }
   } catch (e) {
