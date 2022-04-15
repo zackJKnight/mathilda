@@ -85,7 +85,7 @@ router.get("/etsy/product", async (ctx) => {
     const description = document.getElementById('listing-page-cart')
     const cover = document.querySelector('img.wt-max-width-full').outerHTML.match(/src=\\?"(.*?)\\?"/)[1]
     const title = description.getElementsByClassName('wt-text-body-03')[0].textContent.replace('\\n', '').trim()
-    const price = description.getElementsByClassName('wt-mr-xs-2')[0].textContent.replace('\\n', '').trim()
+    const price = description.getElementsByClassName('wt-mr-xs-2')[0].textContent.replaceAll('\\n', '').replaceAll('Price:', '').replace(/\s+/g, ' ').trim()
 
     ctx.response.body = {
       title,
