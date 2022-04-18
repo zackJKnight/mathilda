@@ -194,7 +194,7 @@ router.get("/generic/product", async (ctx) => {
       return
     }
     if (id?.includes('etsy.com')) {
-      ctx.response.redirect(`https://proxy.wishlily.app/etsy/product?id=${((id + '?').replace(/\/$/, "")).match(/https?:\/\/w?w?w?.?etsy\.com\/(.*?)\?.*/)?.[1]}`)
+      ctx.response.redirect(`https://proxy.wishlily.app/etsy/product?id=${((id + '?').replace(/\/$/, "")).match(/https?:\/\/w?w?w?.?etsy\.com\/listing\/(.*?)\?.*/)?.[1]}`)
       return
     }
 
