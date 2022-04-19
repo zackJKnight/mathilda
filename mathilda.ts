@@ -170,12 +170,12 @@ router.get("/amazon/product", async (ctx) => {
       title,
       price,
       cover,
-      link: `https://amazon.com/${id}`,
+      link: `https://amazon.com${id}`,
       success: true,
     }
   } catch (e) {
     console.log(e)
-    ctx.response.redirect(`https://proxy.wishlily.app/generic/product?keep=true&id=https://amazon.com/${id}`)
+    ctx.response.redirect(`https://proxy.wishlily.app/generic/product?keep=true&id=https://amazon.com${id}`)
   }
 })
 
