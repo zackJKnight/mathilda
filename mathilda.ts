@@ -203,12 +203,13 @@ router.get("/generic/product", async (ctx) => {
     const document: any = new DOMParser().parseFromString(results, 'text/html');
     const cover = getMeta(document, 'og:image') ?? getMeta(document, 'twitter:image:src')
     const title = getMeta(document, 'og:title') ?? getMeta(document, 'twitter:title')
+    const price = results.match(/\$[\n\\n  \t]*[0-9]?[0-9]?[0-9]?[0-9]?[0-9]?[0-9]\.[0-9][0-9]/)?.[1]
 
     if(cover === undefined || title === undefined) throw new Error('Unable to parse meta.')
 
     ctx.response.body = {
       title,
-      price: '???',
+      price,
       cover,
       link: id?.toString() ?? 'https://wishlily.app/',
       success: true,
