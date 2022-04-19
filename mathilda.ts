@@ -76,9 +76,9 @@ router.get("/etsy/search", async (ctx) => {
 })
 
 router.get("/etsy/product", async (ctx) => {
+  const id = ctx.request.url.searchParams.get('id')
   try {
     const lang = ctx.request.headers.get('Accept-Language')
-    const id = ctx.request.url.searchParams.get('id')
     const results = await cfetch(`https://etsy.com/listing/${id}`, lang ?? 'en-US,en;q=0.5')
 
     const document: any = new DOMParser().parseFromString(results, 'text/html');
@@ -94,12 +94,14 @@ router.get("/etsy/product", async (ctx) => {
       link: `https://etsy.com/listing/${id}`,
       success: true,
     }
+
   } catch (e) {
     console.log(e)
     ctx.response.body = {
       message: 'Internal error occurred.',
       success: false,
     }
+    ctx.response.redirect(`https://proxy.wishlily.app/generic/product?keep=true&id=https://etsy.com/listing/${id}`)
     ctx.response.status = Status.InternalServerError
   }
 })
@@ -148,9 +150,9 @@ router.get("/amazon/search", async (ctx) => {
 })
 
 router.get("/amazon/product", async (ctx) => {
+  const id = ctx.request.url.searchParams.get('id')
   try {
     const lang = ctx.request.headers.get('Accept-Language')
-    const id = ctx.request.url.searchParams.get('id')
     const results = await cfetch(`https://amazon.com/${id}`, lang ?? 'en-US,en;q=0.5')
 
     const document: any = new DOMParser().parseFromString(results, 'text/html');
@@ -173,11 +175,7 @@ router.get("/amazon/product", async (ctx) => {
     }
   } catch (e) {
     console.log(e)
-    ctx.response.body = {
-      message: 'Internal error occurred.',
-      success: false,
-    }
-    ctx.response.status = Status.InternalServerError
+    ctx.response.redirect(`https://proxy.wishlily.app/generic/product?keep=true&id=https://amazon.com/${id}`)
   }
 })
 
@@ -189,13 +187,15 @@ router.get("/generic/product", async (ctx) => {
 
     //http://localhost:8080/generic/product?id=https://amazon.com/Victrola-Nostalgic-Bluetooth-Turntable-Entertainment/dp/B00NQL8Z16
     // Handle known link types (a little sloppy but it shouldn't really matter)
-    if (id?.includes('amazon.com')) {
-      ctx.response.redirect(`https://proxy.wishlily.app/amazon/product?id=${id.match(/https?:\/\/w?w?w?.?amazon\.com\/?(.*?\/dp\/[0-9A-Za-z]{10}).*/)?.[1]}`)
-      return
-    }
-    if (id?.includes('etsy.com')) {
-      ctx.response.redirect(`https://proxy.wishlily.app/etsy/product?id=${((id + '?').replace(/\/$/, "")).match(/https?:\/\/w?w?w?.?etsy\.com\/listing\/(.*?)\?.*/)?.[1]}`)
-      return
+    if (ctx.request.url.searchParams.get('keep') !== 'true') {
+      if (id?.includes('amazon.com')) {
+        ctx.response.redirect(`https://proxy.wishlily.app/amazon/product?id=${id.match(/https?:\/\/w?w?w?.?amazon\.com\/?(.*?\/dp\/[0-9A-Za-z]{10}).*/)?.[1]}`)
+        return
+      }
+      if (id?.includes('etsy.com')) {
+        ctx.response.redirect(`https://proxy.wishlily.app/etsy/product?id=${((id + '?').replace(/\/$/, "")).match(/https?:\/\/w?w?w?.?etsy\.com\/listing\/(.*?)\?.*/)?.[1]}`)
+        return
+      }
     }
 
     const results = await cfetch(`${id}`, lang ?? 'en-US,en;q=0.5')
@@ -203,7 +203,9 @@ router.get("/generic/product", async (ctx) => {
     const document: any = new DOMParser().parseFromString(results, 'text/html');
     const cover = getMeta(document, 'og:image') ?? getMeta(document, 'twitter:image:src')
     const title = getMeta(document, 'og:title') ?? getMeta(document, 'twitter:title')
-    const price = results.match(/\$[\n\\n  \t]*[0-9]?[0-9]?[0-9]?[0-9]?[0-9]?[0-9]\.[0-9][0-9]/)?.[1]
+    const ogPrice = (getMeta(document, 'og:price:currency') == 'USD' ? `$${getMeta(document, 'og:price:amount')}` : undefined)
+    const regexPrice = results.match(/\$[\n\\n\s\t]*?([0-9]?[0-9]?[0-9]?[0-9]?[0-9]?[0-9]\.[0-9][0-9])/)?.[1]
+    const price = ogPrice === undefined && regexPrice !== undefined ? `$${regexPrice}` : ogPrice
 
     if(cover === undefined || title === undefined) throw new Error('Unable to parse meta.')
 
