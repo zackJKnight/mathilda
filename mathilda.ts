@@ -190,7 +190,7 @@ router.get("/generic/product", async (ctx) => {
     //http://localhost:8080/generic/product?id=https://amazon.com/Victrola-Nostalgic-Bluetooth-Turntable-Entertainment/dp/B00NQL8Z16
     // Handle known link types (a little sloppy but it shouldn't really matter)
     if (id?.includes('amazon.com')) {
-      ctx.response.redirect(`https://proxy.wishlily.app/amazon/product?id=${id.match(/https?:\/\/w?w?w?.?amazon\.com\/(.*?\/dp\/[0-9A-Za-z]{10}).*/)?.[1]}`)
+      ctx.response.redirect(`https://proxy.wishlily.app/amazon/product?id=${id.match(/https?:\/\/w?w?w?.?amazon\.com\/?(.*?\/dp\/[0-9A-Za-z]{10}).*/)?.[1]}`)
       return
     }
     if (id?.includes('etsy.com')) {
