@@ -1,6 +1,7 @@
 import { Application, Router, Status } from 'https://deno.land/x/oak@v10.5.1/mod.ts'
 import { DOMParser, HTMLDocument } from 'https://deno.land/x/deno_dom@v0.1.22-alpha/deno-dom-wasm.ts';
-import { CORS } from "https://deno.land/x/oak_cors/mod.ts";
+import { CORS } from 'https://deno.land/x/oak_cors@v0.1.0/mod.ts';
+import { Html5Entities } from "https://deno.land/x/html_entities@v1.0/mod.js";
 
 let cache: Map<string, string> = new Map()
 
@@ -218,7 +219,7 @@ router.get("/generic/product", async (ctx) => {
     if(cover === undefined || title === undefined) throw new Error('Unable to parse meta.')
 
     ctx.response.body = {
-      title,
+      title: Html5Entities.decode(title),
       price: price === '$0.00' ? undefined : price,
       cover,
       link: id?.toString() ?? 'https://wishlily.app/',
