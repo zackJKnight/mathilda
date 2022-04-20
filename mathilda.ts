@@ -204,11 +204,13 @@ router.get("/generic/product", async (ctx) => {
     const cover = getMeta(document, 'og:image') ?? getMeta(document, 'twitter:image:src')
     const title = getMeta(document, 'og:title') ?? getMeta(document, 'twitter:title')
     const ogPrice = (getMeta(document, 'og:price:currency') == 'USD' ? `$${getMeta(document, 'og:price:amount')}` : undefined)
-    const regexPrices = results.match(/\$[\n\\n\s\t]*?([0-9]?[0-9]?[0-9]?[0-9]?[0-9]?[0-9]\.[0-9][0-9])/)
+    const regexPrices = results.match(/\$[\n\\n\s\t]*?([0-9]?[0-9]?[0-9]?[0-9]?[0-9]?[0-9]\.[0-9][0-9])/g) ?? []
     let regexPrice
-    for (const thep of regexPrices.splice(0,1)) {
-      if (regexPrice === undefined && thep !== '$0.00') {
-        regexPrice == thep
+    console.log(regexPrices)
+    for (const thep of regexPrices) {
+      const thep2 = thep.replace('$', '').replace('\\', '').replace('n', '').replace('\n', '').replace(' ', '')
+      if (regexPrice === undefined && thep2 !== '0.00') {
+        regexPrice = thep2
       }
     }
     const price = (ogPrice === undefined || ogPrice === '$0.00') && (regexPrice !== undefined && regexPrice !== '$0.00') ? `$${regexPrice}` : ogPrice
