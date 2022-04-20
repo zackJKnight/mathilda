@@ -253,7 +253,7 @@ router.get('/embed', async (ctx) => {
 
     const list = (await dbResponse.json() as Array<any>).reverse()
 
-    ctx.response.redirect(list[0]?.cover)
+    ctx.response.redirect(list[0]?.cover.split('?')[0] + '?format=webp')
   } catch (e) {
     console.log(e)
     ctx.response.body = {
