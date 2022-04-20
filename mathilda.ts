@@ -235,6 +235,35 @@ router.get("/generic/product", async (ctx) => {
   }
 })
 
+router.get('/embed', async (ctx) => {
+  try {
+    const userId = ctx.request.url.searchParams.get('userId')
+    const wishlistId = ctx.request.url.searchParams.get('wishlistId')
+
+    const dbResponse = await fetch('https://data.mongodb-api.com/app/wishlily-website-krmwb/endpoint/list_wishlist', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        wishlistId,
+        userId
+      })
+    })
+
+    const list = (await dbResponse.json() as Array<any>).reverse()
+
+    ctx.response.redirect(list[0]?.cover)
+  } catch (e) {
+    console.log(e)
+    ctx.response.body = {
+      message: 'Internal error occurred.',
+      success: false,
+    }
+    ctx.response.status = Status.InternalServerError
+  }
+})
+
 const app = new Application()
 app.use(CORS())
 app.use(router.routes())
