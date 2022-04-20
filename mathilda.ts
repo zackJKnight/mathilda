@@ -89,8 +89,8 @@ router.get("/etsy/product", async (ctx) => {
     const price = description.getElementsByClassName('wt-mr-xs-2')[0].textContent.replaceAll('\\n', '').replaceAll('Price:', '').replace(/\s+/g, ' ').trim()
 
     ctx.response.body = {
-      title,
-      price,
+      title: Html5Entities.decode(title),
+      price: Html5Entities.decode(price),
       cover,
       link: `https://etsy.com/listing/${id}`,
       success: true,
@@ -168,8 +168,8 @@ router.get("/amazon/product", async (ctx) => {
     }
 
     ctx.response.body = {
-      title,
-      price,
+      title: Html5Entities.decode(title),
+      price: Html5Entities.decode(price),
       cover,
       link: `https://amazon.com${id}`,
       success: true,
