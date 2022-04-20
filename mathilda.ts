@@ -190,7 +190,7 @@ router.get("/generic/product", async (ctx) => {
     // Handle known link types (a little sloppy but it shouldn't really matter)
     if (ctx.request.url.searchParams.get('keep') !== 'true') {
       if (id?.includes('amazon.com')) {
-        ctx.response.redirect(`https://proxy.wishlily.app/amazon/product?id=${id.match(/.*?https?:\/\/w?w?w?.?amazon\.com\/?(.*?\/dp\/[0-9A-Za-z]{10}).*/)?.[1]}`)
+        ctx.response.redirect(`https://proxy.wishlily.app/amazon/product?id=${id.match(/.*?https?:\/\/w?w?w?.?amazon\.com\/?.*?(\/dp\/[0-9A-Za-z]{10}).*/)?.[1]}`)
         return
       }
       if (id?.includes('etsy.com')) {
