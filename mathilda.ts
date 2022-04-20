@@ -206,7 +206,7 @@ router.get("/generic/product", async (ctx) => {
     const ogPrice = (getMeta(document, 'og:price:currency') == 'USD' ? `$${getMeta(document, 'og:price:amount')}` : undefined)
     const regexPrices = results.match(/\$[\n\\n\s\t]*?([0-9]?[0-9]?[0-9]?[0-9]?[0-9]?[0-9]\.[0-9][0-9])/)
     let regexPrice
-    for (const thep of regexPrices) {
+    for (const thep of regexPrices.splice(0,1)) {
       if (regexPrice === undefined && thep !== '$0.00') {
         regexPrice == thep
       }
