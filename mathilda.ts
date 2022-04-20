@@ -205,7 +205,7 @@ router.get("/generic/product", async (ctx) => {
     const title = getMeta(document, 'og:title') ?? getMeta(document, 'twitter:title')
     const ogPrice = (getMeta(document, 'og:price:currency') == 'USD' ? `$${getMeta(document, 'og:price:amount')}` : undefined)
     const regexPrice = results.match(/\$[\n\\n\s\t]*?([0-9]?[0-9]?[0-9]?[0-9]?[0-9]?[0-9]\.[0-9][0-9])/)?.[1]
-    const price = ogPrice === undefined && regexPrice !== undefined ? `$${regexPrice}` : ogPrice
+    const price = (ogPrice === undefined || ogPrice === '$0.00') && (regexPrice !== undefined && regexPrice !== '$0.00') ? `$${regexPrice}` : ogPrice
 
     if(cover === undefined || title === undefined) throw new Error('Unable to parse meta.')
 
