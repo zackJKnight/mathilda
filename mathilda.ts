@@ -32,7 +32,7 @@ const router = new Router()
 
 router.get("/", (ctx) => {
   ctx.response.body = {
-    message: 'Mathilda Scraper for https://wishlily.app/',
+    message: 'General API for https://wishlily.app/',
     success: true,
   }
 })
