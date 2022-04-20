@@ -204,14 +204,20 @@ router.get("/generic/product", async (ctx) => {
     const cover = getMeta(document, 'og:image') ?? getMeta(document, 'twitter:image:src')
     const title = getMeta(document, 'og:title') ?? getMeta(document, 'twitter:title')
     const ogPrice = (getMeta(document, 'og:price:currency') == 'USD' ? `$${getMeta(document, 'og:price:amount')}` : undefined)
-    const regexPrice = results.match(/\$[\n\\n\s\t]*?([0-9]?[0-9]?[0-9]?[0-9]?[0-9]?[0-9]\.[0-9][0-9])/)?.[1]
+    const regexPrices = results.match(/\$[\n\\n\s\t]*?([0-9]?[0-9]?[0-9]?[0-9]?[0-9]?[0-9]\.[0-9][0-9])/)
+    let regexPrice
+    for (const thep of regexPrices) {
+      if (regexPrice === undefined && thep !== '$0.00') {
+        regexPrice == thep
+      }
+    }
     const price = (ogPrice === undefined || ogPrice === '$0.00') && (regexPrice !== undefined && regexPrice !== '$0.00') ? `$${regexPrice}` : ogPrice
 
     if(cover === undefined || title === undefined) throw new Error('Unable to parse meta.')
 
     ctx.response.body = {
       title,
-      price,
+      price: price === '$0.00' ? undefined : price,
       cover,
       link: id?.toString() ?? 'https://wishlily.app/',
       success: true,
