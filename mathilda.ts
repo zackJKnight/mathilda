@@ -245,7 +245,7 @@ router.get("/generic/product", async (ctx) => {
 })
 
 router.get("/generic/search", async (ctx) => {
-  ctx.response.redirect(`https://wishlily.app/etsy/search?q=${ctx.request.url.searchParams.get('q')}`)
+  ctx.response.redirect(`https://proxy.wishlily.app/amazon/search?q=${ctx.request.url.searchParams.get('q')}`)
 })
 
 router.get('/embed', async (ctx) => {
