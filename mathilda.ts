@@ -167,7 +167,7 @@ router.get("/amazon/product", async (ctx) => {
     const results = await cfetch(`https://amazon.com${id}`, lang ?? 'en-US,en;q=0.5')
 
     const document: HTMLDocument | null = new DOMParser().parseFromString(results, 'text/html');
-    const cover = document?.getElementById('landingImage')?.outerHTML?.match(/src=\\?"(.*?)\\?"/)?.[1]
+    let cover = document?.getElementById('landingImage')?.outerHTML?.match(/src=\\?"(.*?)\\?"/)?.[1]
     const title = document?.getElementById('productTitle')?.textContent?.replace('\\n', '')?.trim()
     const priceEl = document?.getElementsByClassName('a-price aok-align-center reinventPricePriceToPayMargin priceToPay')?.[0]
     let price: string | undefined = undefined
@@ -179,6 +179,10 @@ router.get("/amazon/product", async (ctx) => {
 
     if (price === undefined) {
       price = document?.getElementsByClassName('a-color-price')?.[0]?.textContent
+    }
+
+    if (cover === undefined) {
+      cover = document?.getElementById('imgBlkFront')?.outerHTML?.match(/src=\\?"(.*?)\\?"/)?.[1]
     }
 
     ctx.response.body = {
