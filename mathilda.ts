@@ -77,7 +77,7 @@ router.get("/etsy/search", async (ctx) => {
   } catch (e) {
     console.log(e)
     ctx.response.body = {
-      message: 'Internal error occurred.',
+      message: e.message ?? 'Internal error occurred.',
       success: false,
     }
     ctx.response.status = Status.InternalServerError
@@ -153,7 +153,7 @@ router.get("/amazon/search", async (ctx) => {
   } catch (e) {
     console.log(e)
     ctx.response.body = {
-      message: 'Internal error occurred.',
+      message: e.message ?? 'Internal error occurred.',
       success: false,
     }
     ctx.response.status = Status.InternalServerError
@@ -263,7 +263,7 @@ router.get("/generic/product", async (ctx) => {
   } catch (e) {
     console.log(e)
     ctx.response.body = {
-      message: 'Internal error occurred.',
+      message: e.message ?? 'Internal error occurred.',
       success: false,
     }
     ctx.response.status = Status.InternalServerError
@@ -296,7 +296,7 @@ router.get('/embed', async (ctx) => {
   } catch (e) {
     console.log(e)
     ctx.response.body = {
-      message: 'Internal error occurred.',
+      message: e.message ?? 'Internal error occurred.',
       success: false,
     }
     ctx.response.status = Status.InternalServerError
