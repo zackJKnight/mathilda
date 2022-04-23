@@ -215,35 +215,13 @@ router.get("/generic/product", async (ctx) => {
       }
     }
 
+    let results
+    let document: HTMLDocument
     try {
-      const results = await cfetch(`${id}`, lang ?? 'en-US,en;q=0.5')
-
-      const document: HTMLDocument | null = new DOMParser().parseFromString(results, 'text/html');
-      if (document === null) throw new Error('Cannot load website.')
-      const cover = getMeta(document, 'og:image') ?? getMeta(document, 'twitter:image:src')
-      const title = getMeta(document, 'og:title') ?? getMeta(document, 'twitter:title')
-      const ogPrice = (getMeta(document, 'og:price:currency') == 'USD' ? `$${getMeta(document, 'og:price:amount')}` : undefined)
-      const regexPrices = results.match(/\$[\n\\n\s\t]*?([0-9]?[0-9]?[0-9]?[0-9]?[0-9]?[0-9]\.[0-9][0-9])/g) ?? []
-      let regexPrice
-      console.log(regexPrices)
-      for (const thep of regexPrices) {
-        const thep2 = thep.replace('$', '').replace('\\', '').replace('n', '').replace('\n', '').replace(' ', '')
-        if (regexPrice === undefined && thep2 !== '0.00') {
-          regexPrice = thep2
-        }
-      }
-      const price = (ogPrice === undefined || ogPrice === '$0.00') && (regexPrice !== undefined && regexPrice !== '$0.00') ? `$${regexPrice}` : ogPrice
-
-      if(cover === undefined || title === undefined) throw new Error('Unable to parse meta.')
-
-      ctx.response.body = {
-        isSearch: false,
-        title: Html5Entities.decode(title),
-        price: price === '$0.00' ? undefined : price,
-        cover,
-        link: id?.toString() ?? 'https://wishlily.app/',
-        success: true,
-      }
+      results = await cfetch(`${id}`, lang ?? 'en-US,en;q=0.5')
+      const tempDocument = new DOMParser().parseFromString(results, 'text/html');
+      if (tempDocument === null) throw new Error('Cannot load website.')
+      document = tempDocument
     } catch (e) {
       if (keep !== 'true') {
         console.log('(Interpreting as a search)')
@@ -253,9 +231,34 @@ router.get("/generic/product", async (ctx) => {
           isSearch: true,
           success: true,
         }
+        return
       } else {
         throw e // Re-throw to catch below.
       }
+    }
+    const cover = getMeta(document, 'og:image') ?? getMeta(document, 'twitter:image:src')
+    const title = getMeta(document, 'og:title') ?? getMeta(document, 'twitter:title')
+    const ogPrice = (getMeta(document, 'og:price:currency') == 'USD' ? `$${getMeta(document, 'og:price:amount')}` : undefined)
+    const regexPrices = results.match(/\$[\n\\n\s\t]*?([0-9]?[0-9]?[0-9]?[0-9]?[0-9]?[0-9]\.[0-9][0-9])/g) ?? []
+    let regexPrice
+    console.log(regexPrices)
+    for (const thep of regexPrices) {
+      const thep2 = thep.replace('$', '').replace('\\', '').replace('n', '').replace('\n', '').replace(' ', '')
+      if (regexPrice === undefined && thep2 !== '0.00') {
+        regexPrice = thep2
+      }
+    }
+    const price = (ogPrice === undefined || ogPrice === '$0.00') && (regexPrice !== undefined && regexPrice !== '$0.00') ? `$${regexPrice}` : ogPrice
+
+    if(cover === undefined || title === undefined) throw new Error('Unable to parse meta.')
+
+    ctx.response.body = {
+      isSearch: false,
+      title: Html5Entities.decode(title),
+      price: price === '$0.00' ? undefined : price,
+      cover,
+      link: id?.toString() ?? 'https://wishlily.app/',
+      success: true,
     }
   } catch (e) {
     console.log(e)
