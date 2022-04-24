@@ -1,7 +1,7 @@
 import { Application, Router, Status } from 'https://deno.land/x/oak@v10.5.1/mod.ts'
 import { DOMParser, HTMLDocument } from 'https://deno.land/x/deno_dom@v0.1.22-alpha/deno-dom-wasm.ts';
 import { CORS } from 'https://deno.land/x/oak_cors@v0.1.0/mod.ts';
-import { Html5Entities } from "https://deno.land/x/html_entities@v1.0/mod.js";
+import { Html5Entities } from 'https://deno.land/x/html_entities@v1.0/mod.js';
 
 const cache: Map<string, string> = new Map()
 
@@ -23,21 +23,21 @@ async function cfetch(url: string, lang: string): Promise<string> {
 }
 
 function getMeta(document: HTMLDocument, name: string) : string | undefined {
-  const byName = document.querySelector(`meta[name=\"${name}\"]`)?.outerHTML.match(/content=\\?"(.*?)\\?"/)?.[1]
-  const byProperty = document.querySelector(`meta[property=\"${name}\"]`)?.outerHTML.match(/content=\\?"(.*?)\\?"/)?.[1]
+  const byName = document.querySelector(`meta[name=\'${name}\']`)?.outerHTML.match(/content=\\?'(.*?)\\?'/)?.[1]
+  const byProperty = document.querySelector(`meta[property=\'${name}\']`)?.outerHTML.match(/content=\\?'(.*?)\\?'/)?.[1]
   return byName ?? byProperty
 }
 
 const router = new Router()
 
-router.get("/", (ctx) => {
+router.get('/', (ctx) => {
   ctx.response.body = {
     message: 'General API for https://wishlily.app/',
     success: true,
   }
 })
 
-router.get("/etsy/search", async (ctx) => {
+router.get('/etsy/search', async (ctx) => {
   try {
     const lang = ctx.request.headers.get('Accept-Language')
     const query = ctx.request.url.searchParams.get('q')
@@ -48,11 +48,11 @@ router.get("/etsy/search", async (ctx) => {
     const resultsJSON = []
     if (links) {
       for (const link of links) {
-        const productinfo = link.getElementsByClassName("v2-listing-card__info")[0]
+        const productinfo = link.getElementsByClassName('v2-listing-card__info')[0]
         const title = productinfo.getElementsByClassName('v2-listing-card__title')[0].textContent.replace('\\n', '').trim()
-        const cover = link.getElementsByClassName('wt-width-full')?.[0]?.outerHTML?.match(/src="(.*?)"/)?.[1]
-        const price = productinfo.getElementsByClassName("currency-symbol")[0].textContent + productinfo.getElementsByClassName("currency-value")[0].textContent
-        const buyLink = link?.outerHTML?.match(/href="(.*?)\?.*?"/)?.[1]
+        const cover = link.getElementsByClassName('wt-width-full')?.[0]?.outerHTML?.match(/src='(.*?)'/)?.[1]
+        const price = productinfo.getElementsByClassName('currency-symbol')[0].textContent + productinfo.getElementsByClassName('currency-value')[0].textContent
+        const buyLink = link?.outerHTML?.match(/href='(.*?)\?.*?'/)?.[1]
 
         resultsJSON.push({
           title,
@@ -84,7 +84,7 @@ router.get("/etsy/search", async (ctx) => {
   }
 })
 
-router.get("/etsy/product", async (ctx) => {
+router.get('/etsy/product', async (ctx) => {
   const id = ctx.request.url.searchParams.get('id')
   try {
     const lang = ctx.request.headers.get('Accept-Language')
@@ -92,7 +92,7 @@ router.get("/etsy/product", async (ctx) => {
 
     const document: HTMLDocument | null = new DOMParser().parseFromString(results, 'text/html');
     const description = document?.getElementById('listing-page-cart')
-    const cover = document?.querySelector('img.wt-max-width-full')?.outerHTML?.match(/src=\\?"(.*?)\\?"/)?.[1]
+    const cover = document?.querySelector('img.wt-max-width-full')?.outerHTML?.match(/src=\\?'(.*?)\\?'/)?.[1]
     const title = description?.getElementsByClassName('wt-text-body-03')?.[0]?.textContent?.replace('\\n', '')?.trim()
     const price = description?.getElementsByClassName('wt-mr-xs-2')?.[0]?.textContent?.replaceAll('\\n', '')?.replaceAll('Price:', '')?.replace(/\s+/g, ' ')?.trim()
 
@@ -110,7 +110,7 @@ router.get("/etsy/product", async (ctx) => {
   }
 })
 
-router.get("/amazon/search", async (ctx) => {
+router.get('/amazon/search', async (ctx) => {
   try {
     const lang = ctx.request.headers.get('Accept-Language')
     const query = ctx.request.url.searchParams.get('q')?.replace(' ', '+')
@@ -130,9 +130,9 @@ router.get("/amazon/search", async (ctx) => {
       const productinfo = link?.getElementsByClassName('a-section a-spacing-small s-padding-left-small s-padding-right-small')?.[0]
       const titleEl = productinfo?.getElementsByClassName('a-section a-spacing-none a-spacing-top-small s-title-instructions-style')?.[0]
       const title = titleEl?.getElementsByClassName('a-size-base-plus a-color-base a-text-normal')?.[0]?.textContent?.replace('\\n', '')?.trim()
-      const cover = link?.getElementsByClassName('s-image')[0].outerHTML.match(/src="(.*?)"/)?.[1]
-      const price = productinfo?.getElementsByClassName("a-price-symbol")?.[0]?.textContent + productinfo?.getElementsByClassName("a-price-whole")?.[0]?.textContent + productinfo?.getElementsByClassName("a-price-fraction")?.[0]?.textContent
-      const buyLink = titleEl?.getElementsByClassName('a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal')?.[0]?.outerHTML?.match(/href="(.*?)\?.*?"/)?.[1]
+      const cover = link?.getElementsByClassName('s-image')[0].outerHTML.match(/src='(.*?)'/)?.[1]
+      const price = productinfo?.getElementsByClassName('a-price-symbol')?.[0]?.textContent + productinfo?.getElementsByClassName('a-price-whole')?.[0]?.textContent + productinfo?.getElementsByClassName('a-price-fraction')?.[0]?.textContent
+      const buyLink = titleEl?.getElementsByClassName('a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal')?.[0]?.outerHTML?.match(/href='(.*?)\?.*?'/)?.[1]
 
       if (title && cover && price && buyLink && !buyLink.startsWith('/gp/')) {
         resultsJSON.push({
@@ -160,19 +160,19 @@ router.get("/amazon/search", async (ctx) => {
   }
 })
 
-router.get("/amazon/product", async (ctx) => {
+router.get('/amazon/product', async (ctx) => {
   const id = ctx.request.url.searchParams.get('id')
   try {
     const lang = ctx.request.headers.get('Accept-Language')
     const results = await cfetch(`https://amazon.com${id}`, lang ?? 'en-US,en;q=0.5')
 
     const document: HTMLDocument | null = new DOMParser().parseFromString(results, 'text/html');
-    let cover = document?.getElementById('landingImage')?.outerHTML?.match(/src=\\?"(.*?)\\?"/)?.[1]
+    let cover = document?.getElementById('landingImage')?.outerHTML?.match(/src=\\?'(.*?)\\?'/)?.[1]
     const title = document?.getElementById('productTitle')?.textContent?.replace('\\n', '')?.trim()
     const priceEl = document?.getElementsByClassName('a-price aok-align-center reinventPricePriceToPayMargin priceToPay')?.[0]
     let price: string | undefined = undefined
     if (priceEl) {
-      price = priceEl?.getElementsByClassName("a-price-symbol")?.[0]?.textContent + priceEl?.getElementsByClassName("a-price-whole")?.[0]?.textContent + priceEl?.getElementsByClassName("a-price-fraction")?.[0]?.textContent
+      price = priceEl?.getElementsByClassName('a-price-symbol')?.[0]?.textContent + priceEl?.getElementsByClassName('a-price-whole')?.[0]?.textContent + priceEl?.getElementsByClassName('a-price-fraction')?.[0]?.textContent
     } else {
       price = document?.getElementsByClassName('a-price a-text-price a-size-medium apexPriceToPay')?.[0]?.getElementsByClassName('a-offscreen')?.[0]?.textContent
     }
@@ -181,8 +181,12 @@ router.get("/amazon/product", async (ctx) => {
       price = document?.getElementsByClassName('a-color-price')?.[0]?.textContent
     }
 
+    if (price === '$') {
+      price = document?.getElementsByClassName('swatchElement selected')?.[0]?.textContent?.match(/.*?(\$[0-9]+(?:\.|\,)[0-9][0-9])/)?.[1]
+    }
+
     if (cover === undefined) {
-      cover = document?.getElementById('imgBlkFront')?.outerHTML?.match(/src=\\?"(.*?)\\?"/)?.[1]
+      cover = document?.getElementById('imgBlkFront')?.outerHTML?.match(/src=\\?'(.*?)\\?'/)?.[1]
     }
 
     ctx.response.body = {
@@ -199,7 +203,7 @@ router.get("/amazon/product", async (ctx) => {
   }
 })
 
-router.get("/generic/product", async (ctx) => {
+router.get('/generic/product', async (ctx) => {
   try {
     const lang = ctx.request.headers.get('Accept-Language')
     const id = ctx.request.url.searchParams.get('id')
@@ -210,11 +214,11 @@ router.get("/generic/product", async (ctx) => {
     // Handle known link types (a little sloppy but it shouldn't really matter)
     if (keep !== 'true') {
       if (id?.includes('amazon.com')) {
-        ctx.response.redirect(`https://proxy.wishlily.app/amazon/product?id=/dp${id.match(/.*?https?:\/\/w?w?w?.?amazon\.com\/?.*?\/(?:dp|gp)\/?a?w?\/?d?(\/[0-9A-Z]{10}).*/)?.[1]}`)
+        ctx.response.redirect(`https://proxy.wishlily.app/amazon/product?id=/dp${id.match(/.*?h?t?t?p?s?:?\/?\/?w?w?w?.?amazon\.com\/?.*?\/(?:dp|gp)\/?a?w?\/?d?(\/[0-9A-Z]{10}).*/)?.[1]}`)
         return
       }
       if (id?.includes('etsy.com')) {
-        ctx.response.redirect(`https://proxy.wishlily.app/etsy/product?id=${((id + '?').replace(/\/$/, "")).match(/https?:\/\/w?w?w?.?etsy\.com\/listing\/(.*?)\?.*/)?.[1]}`)
+        ctx.response.redirect(`https://proxy.wishlily.app/etsy/product?id=${((id + '?').replace(/\/$/, '')).match(/h?t?t?p?s?:?\/?\/?w?w?w?.?etsy\.com\/listing\/(.*?)\?.*/)?.[1]}`)
         return
       }
     }
@@ -274,7 +278,7 @@ router.get("/generic/product", async (ctx) => {
   }
 })
 
-router.get("/generic/search", (ctx) => {
+router.get('/generic/search', (ctx) => {
   ctx.response.redirect(`https://proxy.wishlily.app/etsy/search?q=${ctx.request.url.searchParams.get('q')}`)
 })
 
