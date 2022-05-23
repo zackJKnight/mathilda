@@ -255,7 +255,7 @@ router.get('/amazon/product', async (ctx) => {
     }
 
     // Sometimes amazon breaks stuff.
-    const bkp = await fetch(`https://proxy.wishlily.app/generic/product?keep=true&id=${encodeURIComponent('https://amazon.com' + id)}`)
+    const bkp = await(await fetch(`https://proxy.wishlily.app/generic/product?keep=true&id=${encodeURIComponent('https://amazon.com' + id)}`)).json()
 
     ctx.response.body = {
       title: title ? Html5Entities.decode(title) : bkp.title,
