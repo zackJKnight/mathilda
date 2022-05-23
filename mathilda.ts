@@ -333,6 +333,7 @@ router.get('/generic/product', async (ctx) => {
     ctx.response.body = {
       message: e.message ?? 'Internal error occurred.',
       success: false,
+      id
     }
     ctx.response.status = Status.InternalServerError
   }
