@@ -102,10 +102,6 @@ router.get('/generic/product', async (ctx) => {
     id = idp ? decodeURIComponent(idp) : undefined
     if (id?.includes('proxy.wishlily.app') || id?.includes('deno.dev')) throw new Error('Infinite proxy loop!')
 
-    if (id?.includes('amazon.com')) {
-      id = `https://amazon.com/dp${id.match(/.*?h?t?t?p?s?:?\/?\/?w?w?w?.?amazon\.com\/?.*?\/(?:dp|gp)\/?a?w?\/?d?(\/[0-9A-Z]{10}).*/)?.[1]}`
-    }
-
     const results = await cfetch(`${id}`, lang ?? 'en-US,en;q=0.5')
     const tempDocument = new DOMParser().parseFromString(results, 'text/html');
     if (tempDocument === null) throw new Error('Cannot load website.')
