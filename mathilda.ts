@@ -56,7 +56,7 @@ async function cfetch(url: string, lang: string): Promise<string> {
         for (const eachCookie of cookies) {
           if (eachCookie.includes('=')) {
             const newCookie = eachCookie?.split('=')
-            if (!['path','expires', '', ' '].includes(newCookie[0]) && newCookie[0] !== undefined && newCookie[1] !== undefined) {
+            if (!['path','expires', 'domain', 'samesite', '', ' '].includes(newCookie[0].toString().toLocaleLowerCase()) && newCookie[0] !== undefined && newCookie[1] !== undefined) {
               if (newCookie) {
                 cookie[newCookie[0]] = newCookie[1]
                 console.log(` |  Cookie "${newCookie[0]}" set to "${newCookie[1]}"`)
