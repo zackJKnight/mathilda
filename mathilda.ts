@@ -17,19 +17,6 @@ function cookieString(cookies: Record<string, string>): string {
 async function cfetch(url: string, lang: string): Promise<string> {
   if (cache.has(lang + url)) {
     return cache.get(lang + url) ?? ''
-  } else if (url.includes('amazon.com')) {
-    const it = (await fetch(
-        url,
-        {
-          headers: {
-            'accept-language': lang,
-            'upgrade-insecure-requests': '1',
-            'user-agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
-            'accept': 'text/html',
-          }
-        }
-      ))
-    return await it.text()
   } else {
     let it: Response | undefined
     let newURL = url
@@ -264,16 +251,19 @@ router.get('/amazon/product', async (ctx) => {
     }
 
     if (cover === undefined) {
-      cover = results?.match(/.*?(https\:\/\/images.*?\/I\/.*?webp\_\.jpg).*/)?.[1]
+      cover = results?.match(/(https\:\/\/images.*?\/I\/.*?.jpg)/g)?.[0]
     }
 
-    // Sometimes amazon breaks stuff.
-    const bkp = await(await fetch(`https://proxy.wishlily.app/generic/product?keep=true&id=${encodeURIComponent('https://amazon.com' + id)}`)).json()
+    let bkp
+    if (title === undefined || price === undefined || cover === undefined) {
+      // Sometimes amazon breaks stuff.
+      bkp = await(await fetch(`https://proxy.wishlily.app/generic/product?keep=true&id=${encodeURIComponent('https://amazon.com' + id)}`)).json()
+    }
 
     ctx.response.body = {
-      title: title ? Html5Entities.decode(title) : bkp.title,
-      price: price ? Html5Entities.decode(price) : bkp.price,
-      cover: cover ?? bkp.cover,
+      title: title ? Html5Entities.decode(title) : bkp?.title,
+      price: price ? Html5Entities.decode(price) : bkp?.price,
+      cover: cover ?? bkp?.cover,
       link: `https://amazon.com${id}`,
       success: true,
     }
@@ -288,7 +278,8 @@ router.get('/generic/product', async (ctx) => {
   let id: string | undefined
   try {
     const lang = ctx.request.headers.get('Accept-Language')
-    id = decodeURIComponent(ctx.request.url.searchParams.get('id'))
+    const idp = ctx.request.url.searchParams.get('id')
+    id = idp ? decodeURIComponent(idp) : undefined
     const keep = ctx.request.url.searchParams.get('keep')
     if (id?.includes('proxy.wishlily.app') || id?.includes('deno.dev')) throw new Error('Infinite proxy loop!')
 
@@ -346,7 +337,7 @@ router.get('/generic/product', async (ctx) => {
 
     ctx.response.body = {
       isSearch: false,
-      title: Html5Entities.decode(title),
+      title: title ? Html5Entities.decode(title) : undefined,
       price: price === '$0.00' ? undefined : price,
       cover,
       link: id?.toString() ?? 'https://wishlily.app/',
