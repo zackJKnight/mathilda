@@ -251,7 +251,7 @@ router.get('/amazon/product', async (ctx) => {
     }
 
     if (cover === undefined) {
-      cover = results?.match(/.*?(https://images.*?/I/.*?webp_.jpg/)?.[1]
+      cover = results?.match(/.*?(https://images.*?/I/.*?webp\_\.jpg/)?.[1]
     }
 
     // Sometimes amazon breaks stuff.
