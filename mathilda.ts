@@ -323,8 +323,6 @@ router.get('/generic/product', async (ctx) => {
     }
     const price = (ogPrice === undefined || ogPrice === '$0.00') && (regexPrice !== undefined && regexPrice !== '$0.00') ? `$${regexPrice}` : ogPrice
 
-    if(cover === undefined || title === undefined) throw new Error('Unable to parse meta.')
-
     ctx.response.body = {
       isSearch: false,
       title: Html5Entities.decode(title),
