@@ -52,15 +52,14 @@ async function cfetch(url: string, lang: string): Promise<string> {
         newURL = loc
       }
 
-      const cookieHeaders = it.headers.get('set-cookie')
-      if (cookieHeaders) {
-        for (const cookieHeader of cookieHeaders) {
+      it.headers.forEach((cookieHeader, key) => {
+        if (key === 'set-cookie') {
           const cookies = cookieHeader?.split('; ')
           if (cookies) {
             for (const eachCookie of cookies) {
               if (eachCookie.includes('=')) {
                 const newCookie = eachCookie?.split('=')
-                if (!['path','expires', 'domain', 'samesite', '', ' '].includes(newCookie[0].toString().toLocaleLowerCase()) && newCookie[0] !== undefined && newCookie[1] !== undefined) {
+                if (!['path','expires', 'domain', 'samesite', 'max-age', 'mode', 'dur', '', ' '].includes(newCookie[0].toString().toLocaleLowerCase()) && newCookie[0] !== undefined && newCookie[1] !== undefined) {
                   if (newCookie) {
                     cookie[newCookie[0]] = newCookie[1]
                     console.log(` |  Cookie "${newCookie[0]}" set to "${newCookie[1]}"`)
@@ -70,7 +69,7 @@ async function cfetch(url: string, lang: string): Promise<string> {
             }
           }
         }
-      }
+      })
       tries++;
     }
     if (tries === 30) {
@@ -329,7 +328,8 @@ router.get('/generic/product', async (ctx) => {
     }
     const cover = getMeta(document, 'og:image') ?? getMeta(document, 'twitter:image:src')
     const title = getMeta(document, 'title') ?? getMeta(document, 'og:title') ?? getMeta(document, 'twitter:title')
-    const ogPrice = (getMeta(document, 'og:price:currency') == 'USD' ? `$${getMeta(document, 'og:price:amount')}` : undefined)
+    let shopifyPrice = ((getMeta(document, 'product:price:currency') == 'USD' || (getMeta(document, 'product:price:currency') === undefined && getMeta(document, 'product:price:amount'))) ? `$${getMeta(document, 'product:price:amount')}` : undefined)
+    let ogPrice = ((getMeta(document, 'og:price:currency') == 'USD' || (getMeta(document, 'og:price:currency') === undefined && getMeta(document, 'og:price:amount'))) ? `$${getMeta(document, 'og:price:amount')}` : undefined)
     const regexPrices = results.match(/\$[\n\\n\s\t]*?([0-9]?[0-9]?[0-9]?[0-9]?[0-9]?[0-9]\.?[0-9][0-9])/g) ?? []
     let regexPrice
     console.log(regexPrices)
@@ -339,7 +339,9 @@ router.get('/generic/product', async (ctx) => {
         regexPrice = thep2
       }
     }
-    const price = (ogPrice === undefined || ogPrice === '$0.00') && (regexPrice !== undefined && regexPrice !== '$0.00') ? `$${regexPrice}` : ogPrice
+    if (shopifyPrice === '$0.00' || shopifyPrice === '$0') shopifyPrice = undefined
+    if (ogPrice === '$0.00' || ogPrice === '$0') ogPrice = undefined
+    const price = shopifyPrice ?? ogPrice ?? `$${regexPrice}`
 
     ctx.response.body = {
       isSearch: false,
