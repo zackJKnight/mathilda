@@ -250,6 +250,10 @@ router.get('/amazon/product', async (ctx) => {
       cover = document?.getElementById('detailImg')?.outerHTML?.match(/src=\\?"(.*?)\\?"/)?.[1]
     }
 
+    if (cover === undefined) {
+      cover = results?.match(/.*?(https://images.*?/I/.*?webp_.jpg/)?.[1]
+    }
+
     // Sometimes amazon breaks stuff.
     const bkp = await fetch(`https://proxy.wishlily.app/generic/product?keep=true&id=${encodeURIComponent('https://amazon.com' + id)}`)
 
