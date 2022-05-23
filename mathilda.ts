@@ -284,6 +284,10 @@ router.get('/generic/product', async (ctx) => {
       }
     }
 
+    if (id?.includes('amazon.com')) {
+      id = `https://amazon.com/dp${id.match(/.*?h?t?t?p?s?:?\/?\/?w?w?w?.?amazon\.com\/?.*?\/(?:dp|gp)\/?a?w?\/?d?(\/[0-9A-Z]{10}).*/)?.[1]}`
+    }
+
     let results
     let document: HTMLDocument
     try {
@@ -308,7 +312,7 @@ router.get('/generic/product', async (ctx) => {
     const cover = getMeta(document, 'og:image') ?? getMeta(document, 'twitter:image:src')
     const title = getMeta(document, 'title') ?? getMeta(document, 'og:title') ?? getMeta(document, 'twitter:title')
     const ogPrice = (getMeta(document, 'og:price:currency') == 'USD' ? `$${getMeta(document, 'og:price:amount')}` : undefined)
-    const regexPrices = results.match(/\$[\n\\n\s\t]*?([0-9]?[0-9]?[0-9]?[0-9]?[0-9]?[0-9]\.[0-9][0-9])/g) ?? []
+    const regexPrices = results.match(/\$[\n\\n\s\t]*?([0-9]?[0-9]?[0-9]?[0-9]?[0-9]?[0-9]\.?[0-9][0-9])/g) ?? []
     let regexPrice
     console.log(regexPrices)
     for (const thep of regexPrices) {
