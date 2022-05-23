@@ -247,7 +247,7 @@ router.get('/amazon/product', async (ctx) => {
     }
 
     // Sometimes amazon breaks stuff.
-    const bkp = await fetch(`https://proxy.wishlily.app/generic/product?keep=true&id=${'https://amazon.com' + id}`)
+    const bkp = await fetch(`https://proxy.wishlily.app/generic/product?keep=true&id=${encodeURIComponent('https://amazon.com' + id)}`)
 
     ctx.response.body = {
       title: title ? Html5Entities.decode(title) : bkp.title,
@@ -266,7 +266,7 @@ router.get('/amazon/product', async (ctx) => {
 router.get('/generic/product', async (ctx) => {
   try {
     const lang = ctx.request.headers.get('Accept-Language')
-    const id = ctx.request.url.searchParams.get('id')
+    const id = decodeURIComponent(ctx.request.url.searchParams.get('id'))
     const keep = ctx.request.url.searchParams.get('keep')
     if (id?.includes('proxy.wishlily.app') || id?.includes('deno.dev')) throw new Error('Infinite proxy loop!')
 
