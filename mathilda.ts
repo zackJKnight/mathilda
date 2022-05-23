@@ -264,9 +264,10 @@ router.get('/amazon/product', async (ctx) => {
 })
 
 router.get('/generic/product', async (ctx) => {
+  let id: string | undefined
   try {
     const lang = ctx.request.headers.get('Accept-Language')
-    const id = decodeURIComponent(ctx.request.url.searchParams.get('id'))
+    id = decodeURIComponent(ctx.request.url.searchParams.get('id'))
     const keep = ctx.request.url.searchParams.get('keep')
     if (id?.includes('proxy.wishlily.app') || id?.includes('deno.dev')) throw new Error('Infinite proxy loop!')
 
