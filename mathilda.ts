@@ -19,7 +19,7 @@ async function cfetch(url: string, lang: string): Promise<string> {
     return cache.get(lang + url) ?? ''
   } else if (url.includes('amazon.com')) {
     const it = (await fetch(
-        newURL,
+        url,
         {
           headers: {
             'accept-language': lang,
