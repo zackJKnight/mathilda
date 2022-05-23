@@ -5,18 +5,75 @@ import { Html5Entities } from 'https://deno.land/x/html_entities@v1.0/mod.js';
 
 const cache: Map<string, string> = new Map()
 
+function cookieString(cookies: Record<string, string>): string {
+  let string = ''
+  for (const cookie in cookies) {
+    string = `${string}${cookie}=${cookies[cookie]}; `
+  }
+  string = string.slice(0, string.length - 2)
+  return string
+}
+
 async function cfetch(url: string, lang: string): Promise<string> {
   if (cache.has(lang + url)) {
     return cache.get(lang + url) ?? ''
   } else {
-    const text = await (await fetch(
-      url,
-      {
-        headers: {
-          'Accept-Language': lang,
+    let it: Response | undefined
+    let newURL = url
+    const cookie: Record<string, string> = {}
+    let tries = 0
+    console.log('[ ] Starting request')
+    while ((it === undefined || (it.headers.has('set-cookie') && cookie === {}) || (it.headers.has('location')) || it.status === 301 || it.status === 302) && tries < 30) {
+      it = (await fetch(
+        newURL,
+        {
+          headers: {
+            'Accept-Language': lang,
+            'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="101", "Google Chrome";v="101"',
+            'sec-ch-ua-mobile': '?1',
+            'sec-ch-ua-platform': '"Android"',
+            'sec-fetch-dest': 'document',
+            'sec-fetch-mode': 'navigate',
+            'sec-fetch-site': 'none',
+            'sec-fetch-user': '?1',
+            'sec-gpc': '1',
+            'upgrade-insecure-requests': '1',
+            'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.64 Mobile Safari/537.36',
+            'cache-control': 'no-cache',
+            'accept': 'text/html',
+            'cookie': cookieString(cookie)
+          },
+          redirect: 'manual'
+        }
+      ))
+      const loc = it.headers.get('location')
+      if ((it.status === 301 || it.status === 302) && loc) {
+        console.log(` |  Redirected to "${loc}"`)
+        newURL = loc
+      }
+      const cookies = it.headers.get('set-cookie')?.split('; ')
+      if (cookies) {
+        for (const eachCookie of cookies) {
+          if (eachCookie.includes('=')) {
+            const newCookie = eachCookie?.split('=')
+            if (!['path','expires', '', ' '].includes(newCookie[0]) && newCookie[0] !== undefined && newCookie[1] !== undefined) {
+              if (newCookie) {
+                cookie[newCookie[0]] = newCookie[1]
+                console.log(` |  Cookie "${newCookie[0]}" set to "${newCookie[1]}"`)
+              }
+            }
+          }
         }
       }
-    )).text()
+      tries++;
+    }
+    if (tries === 30) {
+      console.log(`[ ] Bailed!`)
+    } else {
+      console.log(`[X] Finished request!`)
+    }
+    if (it === undefined) throw new Error('Bail - unable to handle URL shenanigans')
+    const text = await it.text()
     cache.set(lang + url, text)
     return text
   }
