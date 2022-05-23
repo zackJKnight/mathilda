@@ -330,18 +330,19 @@ router.get('/generic/product', async (ctx) => {
     const title = getMeta(document, 'title') ?? getMeta(document, 'og:title') ?? getMeta(document, 'twitter:title')
     let shopifyPrice = ((getMeta(document, 'product:price:currency') == 'USD' || (getMeta(document, 'product:price:currency') === undefined && getMeta(document, 'product:price:amount'))) ? `$${getMeta(document, 'product:price:amount')}` : undefined)
     let ogPrice = ((getMeta(document, 'og:price:currency') == 'USD' || (getMeta(document, 'og:price:currency') === undefined && getMeta(document, 'og:price:amount'))) ? `$${getMeta(document, 'og:price:amount')}` : undefined)
-    const regexPrices = results.match(/\$[\n\\n\s\t]*?([0-9]?[0-9]?[0-9]?[0-9]?[0-9]?[0-9]\.?[0-9][0-9])/g) ?? []
+    const regexPrices = results.match(/\$[\n\\n\s\t ]*?([0-9]+?\.?[0-9][0-9])/g)?.reverse() ?? []
     let regexPrice
     console.log(regexPrices)
     for (const thep of regexPrices) {
       const thep2 = thep.replace('$', '').replace('\\', '').replace('n', '').replace('\n', '').replace(' ', '')
-      if (regexPrice === undefined && thep2 !== '0.00') {
+      if (regexPrice === undefined && thep2 !== '0.00' && thep2 !== '0' && thep.match(/[0]?/)?.[0] !== thep) {
         regexPrice = thep2
       }
     }
     if (shopifyPrice === '$0.00' || shopifyPrice === '$0') shopifyPrice = undefined
     if (ogPrice === '$0.00' || ogPrice === '$0') ogPrice = undefined
-    const price = shopifyPrice ?? ogPrice ?? `$${regexPrice}`
+    if (regexPrice) regexPrice = '$' + regexPrice
+    const price = shopifyPrice ?? ogPrice ?? regexPrice
 
     ctx.response.body = {
       isSearch: false,
