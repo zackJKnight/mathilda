@@ -17,6 +17,20 @@ function cookieString(cookies: Record<string, string>): string {
 async function cfetch(url: string, lang: string): Promise<string> {
   if (cache.has(lang + url)) {
     return cache.get(lang + url) ?? ''
+  } else if (url.includes('amazon.com') {
+    const it = (await fetch(
+        newURL,
+        {
+          headers: {
+            'accept-language': lang,
+            'upgrade-insecure-requests': '1',
+            'user-agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+            'accept': 'text/html',
+          },
+          redirect: 'manual'
+        }
+      ))
+    return await it.text()
   } else {
     let it: Response | undefined
     let newURL = url
