@@ -51,15 +51,21 @@ async function cfetch(url: string, lang: string): Promise<string> {
         console.log(` |  Redirected to "${loc}"`)
         newURL = loc
       }
-      const cookies = it.headers.get('set-cookie')?.split('; ')
-      if (cookies) {
-        for (const eachCookie of cookies) {
-          if (eachCookie.includes('=')) {
-            const newCookie = eachCookie?.split('=')
-            if (!['path','expires', 'domain', 'samesite', '', ' '].includes(newCookie[0].toString().toLocaleLowerCase()) && newCookie[0] !== undefined && newCookie[1] !== undefined) {
-              if (newCookie) {
-                cookie[newCookie[0]] = newCookie[1]
-                console.log(` |  Cookie "${newCookie[0]}" set to "${newCookie[1]}"`)
+
+      const cookieHeaders = it.headers.get('set-cookie')
+      if (cookieHeaders) {
+        for (const cookieHeader of cookieHeaders) {
+          const cookies = cookieHeader?.split('; ')
+          if (cookies) {
+            for (const eachCookie of cookies) {
+              if (eachCookie.includes('=')) {
+                const newCookie = eachCookie?.split('=')
+                if (!['path','expires', 'domain', 'samesite', '', ' '].includes(newCookie[0].toString().toLocaleLowerCase()) && newCookie[0] !== undefined && newCookie[1] !== undefined) {
+                  if (newCookie) {
+                    cookie[newCookie[0]] = newCookie[1]
+                    console.log(` |  Cookie "${newCookie[0]}" set to "${newCookie[1]}"`)
+                  }
+                }
               }
             }
           }
