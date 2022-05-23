@@ -246,10 +246,13 @@ router.get('/amazon/product', async (ctx) => {
       cover = document?.getElementById('imgBlkFront')?.outerHTML?.match(/src=\\?"(.*?)\\?"/)?.[1]
     }
 
+    // Sometimes amazon breaks stuff.
+    const bkp = await fetch(`https://proxy.wishlily.app/generic/product?keep=true&id=${'https://amazon.com' + id}`)
+
     ctx.response.body = {
-      title: title ? Html5Entities.decode(title) : undefined,
-      price: price ? Html5Entities.decode(price) : undefined,
-      cover,
+      title: title ? Html5Entities.decode(title) : bkp.title,
+      price: price ? Html5Entities.decode(price) : bkp.price,
+      cover: cover ?? bkp.cover,
       link: `https://amazon.com${id}`,
       success: true,
     }
