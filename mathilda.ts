@@ -17,7 +17,7 @@ function cookieString(cookies: Record<string, string>): string {
 async function cfetch(url: string, lang: string): Promise<string> {
   if (cache.has(lang + url)) {
     return cache.get(lang + url) ?? ''
-  } else if (url.includes('amazon.com') {
+  } else if (url.includes('amazon.com')) {
     const it = (await fetch(
         newURL,
         {
