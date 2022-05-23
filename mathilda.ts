@@ -26,8 +26,7 @@ async function cfetch(url: string, lang: string): Promise<string> {
             'upgrade-insecure-requests': '1',
             'user-agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
             'accept': 'text/html',
-          },
-          redirect: 'manual'
+          }
         }
       ))
     return await it.text()
