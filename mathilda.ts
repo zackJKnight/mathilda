@@ -397,7 +397,7 @@ router.get('/embed', async (ctx) => {
 })
 
 const app = new Application()
-app.use(CORS({origin: 'wishlily.app'}))
+app.use(CORS({origin: (Deno.env.get('ENVIRONMENT') === 'production' ? 'wishlily.app' : '*')}))
 app.use(router.routes())
 app.use(router.allowedMethods())
 
