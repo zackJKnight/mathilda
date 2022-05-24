@@ -169,7 +169,7 @@ router.get('/etsy/product', async (ctx) => {
     }
   } catch (e) {
     console.log(e)
-    ctx.response.redirect(`https://proxy.wishlily.app/generic/product?keep=true&id=https://etsy.com/listing/${id}`)
+    ctx.response.redirect(`${(Deno.env.get('ENVIRONMENT') === 'production' ? 'https://proxy.wishlily.app' : 'http://localhost:8080')}/generic/product?keep=true&id=https://etsy.com/listing/${id}`)
     ctx.response.status = Status.InternalServerError
   }
 })
@@ -264,7 +264,7 @@ router.get('/amazon/product', async (ctx) => {
     let bkp
     if (title === undefined || price === undefined || cover === undefined) {
       // Sometimes amazon breaks stuff.
-      bkp = await(await fetch(`https://proxy.wishlily.app/generic/product?keep=true&id=${encodeURIComponent('https://amazon.com' + id)}`)).json()
+      bkp = await(await fetch(`${(Deno.env.get('ENVIRONMENT') === 'production' ? 'https://proxy.wishlily.app' : 'http://localhost:8080')}/generic/product?keep=true&id=${encodeURIComponent('https://amazon.com' + id)}`)).json()
     }
 
     ctx.response.body = {
@@ -276,7 +276,7 @@ router.get('/amazon/product', async (ctx) => {
     }
   } catch (e) {
     console.log(e)
-    ctx.response.redirect(`https://proxy.wishlily.app/generic/product?keep=true&id=https://amazon.com${id}`)
+    ctx.response.redirect(`${(Deno.env.get('ENVIRONMENT') === 'production' ? 'https://proxy.wishlily.app' : 'http://localhost:8080')}/generic/product?keep=true&id=https://amazon.com${id}`)
     ctx.response.status = Status.InternalServerError
   }
 })
@@ -294,11 +294,11 @@ router.get('/generic/product', async (ctx) => {
     // Handle known link types (a little sloppy but it shouldn't really matter)
     if (keep !== 'true') {
       if (id?.includes('amazon.com')) {
-        ctx.response.redirect(`https://proxy.wishlily.app/amazon/product?id=/dp${id.match(/.*?h?t?t?p?s?:?\/?\/?w?w?w?.?amazon\.com\/?.*?\/(?:dp|gp)\/?a?w?\/?d?(\/[0-9A-Z]{10}).*/)?.[1]}`)
+        ctx.response.redirect(`${(Deno.env.get('ENVIRONMENT') === 'production' ? 'https://proxy.wishlily.app' : 'http://localhost:8080')}/amazon/product?id=/dp${id.match(/.*?h?t?t?p?s?:?\/?\/?w?w?w?.?amazon\.com\/?.*?\/(?:dp|gp)\/?a?w?\/?d?(\/[0-9A-Z]{10}).*/)?.[1]}`)
         return
       }
       if (id?.includes('etsy.com')) {
-        ctx.response.redirect(`https://proxy.wishlily.app/etsy/product?id=${((id + '?').replace(/\/$/, '')).match(/h?t?t?p?s?:?\/?\/?w?w?w?.?etsy\.com\/listing\/(.*?)\?.*/)?.[1]}`)
+        ctx.response.redirect(`${(Deno.env.get('ENVIRONMENT') === 'production' ? 'https://proxy.wishlily.app' : 'http://localhost:8080')}/etsy/product?id=${((id + '?').replace(/\/$/, '')).match(/h?t?t?p?s?:?\/?\/?w?w?w?.?etsy\.com\/listing\/(.*?)\?.*/)?.[1]}`)
         return
       }
     }
@@ -366,7 +366,7 @@ router.get('/generic/product', async (ctx) => {
 })
 
 router.get('/generic/search', (ctx) => {
-  ctx.response.redirect(`https://proxy.wishlily.app/etsy/search?q=${ctx.request.url.searchParams.get('q')}`)
+  ctx.response.redirect(`${(Deno.env.get('ENVIRONMENT') === 'production' ? 'https://proxy.wishlily.app' : 'http://localhost:8080')}/etsy/search?q=${ctx.request.url.searchParams.get('q')}`)
 })
 
 router.get('/embed', async (ctx) => {
