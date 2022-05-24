@@ -93,9 +93,11 @@ function getMeta(document: HTMLDocument, name: string) : string | undefined {
 const router = new Router()
 
 router.get('/', (ctx) => {
+  ctx.response.status = 200
   ctx.response.body = {
-    message: 'General API for https://wishlily.app/',
+    message: '🦐 WishLily Scraper API. https://wishlily.app/',
     success: true,
+    env: (Deno.env.get('ENVIRONMENT') === 'production' ? undefined : Deno.env.get('ENVIRONMENT'))
   }
 })
 
