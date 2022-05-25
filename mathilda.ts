@@ -344,7 +344,7 @@ router.get('/generic/product', async (ctx) => {
     if (regexPrice) regexPrice = '$' + regexPrice
     const price = shopifyPrice ?? ogPrice ?? regexPrice
 
-    if(cover === undefined || title === undefined) throw new Error('Unable to parse meta.')
+    if(cover === undefined || title === undefined) throw new Error('Unable to parse link.')
 
     ctx.response.body = {
       isSearch: false,
