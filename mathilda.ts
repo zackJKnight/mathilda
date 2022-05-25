@@ -1,7 +1,7 @@
-import { Application, Router, Status } from 'https://deno.land/x/oak@v10.5.1/mod.ts'
-import { DOMParser, HTMLDocument } from 'https://deno.land/x/deno_dom@v0.1.22-alpha/deno-dom-wasm.ts';
-import { CORS } from 'https://deno.land/x/oak_cors@v0.1.0/mod.ts';
-import { Html5Entities } from 'https://deno.land/x/html_entities@v1.0/mod.js';
+import { Application, Router, Status } from 'https://deno.land/x/oak@v10.6.0/mod.ts'
+import { DOMParser, HTMLDocument } from 'https://deno.land/x/deno_dom@v0.1.22-alpha/deno-dom-wasm.ts'
+import { CORS } from 'https://deno.land/x/oak_cors@v0.1.1/mod.ts'
+import { Html5Entities } from 'https://deno.land/x/html_entities@v1.0/mod.js'
 
 const cache: Map<string, string> = new Map()
 
@@ -70,7 +70,7 @@ async function cfetch(url: string, lang: string): Promise<string> {
           }
         }
       })
-      tries++;
+      tries++
     }
     if (tries === 30) {
       console.log(`[ ] Bailed!`)
@@ -106,7 +106,7 @@ router.get('/etsy/search', async (ctx) => {
     const lang = ctx.request.headers.get('Accept-Language')
     const query = ctx.request.url.searchParams.get('q')
     const results = await cfetch(`https://etsy.com/search?q=${query}`, lang ?? 'en-US,en;q=0.5')
-    const document: HTMLDocument | null = new DOMParser().parseFromString(results, 'text/html');
+    const document: HTMLDocument | null = new DOMParser().parseFromString(results, 'text/html')
     const links = document?.getElementsByClassName('v2-listing-card')
 
     const resultsJSON = []
@@ -154,7 +154,7 @@ router.get('/etsy/product', async (ctx) => {
     const lang = ctx.request.headers.get('Accept-Language')
     const results = await cfetch(`https://etsy.com/listing/${id}`, lang ?? 'en-US,en;q=0.5')
 
-    const document: HTMLDocument | null = new DOMParser().parseFromString(results, 'text/html');
+    const document: HTMLDocument | null = new DOMParser().parseFromString(results, 'text/html')
     const description = document?.getElementById('listing-page-cart')
     const cover = document?.querySelector('img.wt-max-width-full')?.outerHTML?.match(/src=\\?"(.*?)\\?"/)?.[1]
     const title = description?.getElementsByClassName('wt-text-body-03')?.[0]?.textContent?.replace('\\n', '')?.trim()
@@ -179,7 +179,7 @@ router.get('/amazon/search', async (ctx) => {
     const lang = ctx.request.headers.get('Accept-Language')
     const query = ctx.request.url.searchParams.get('q')?.replace(' ', '+')
     const results = await cfetch(`https://amazon.com/s?k=${query}`, lang ?? 'en-US,en;q=0.5')
-    const document: HTMLDocument | null = new DOMParser().parseFromString(results, 'text/html');
+    const document: HTMLDocument | null = new DOMParser().parseFromString(results, 'text/html')
     const links = document?.getElementsByClassName('a-section a-spacing-base')
 
     const resultsJSON = []
@@ -206,7 +206,6 @@ router.get('/amazon/search', async (ctx) => {
           link: `https://amazon.com${buyLink}`.match(/(.*?)\/ref=.*/)?.[1] ?? `https://amazon.com${buyLink}`,
           id: buyLink?.match(/\/?(.*?)\/ref=.*/)?.[1]
         })
-        console.log(buyLink)
       }
     }
 
@@ -230,7 +229,7 @@ router.get('/amazon/product', async (ctx) => {
     const lang = ctx.request.headers.get('Accept-Language')
     const results = await cfetch(`https://amazon.com${id}`, lang ?? 'en-US,en;q=0.5')
 
-    const document: HTMLDocument | null = new DOMParser().parseFromString(results, 'text/html');
+    const document: HTMLDocument | null = new DOMParser().parseFromString(results, 'text/html')
     let cover = document?.getElementById('landingImage')?.outerHTML?.match(/src=\\?"(.*?)\\?"/)?.[1]
     const title = document?.getElementById('productTitle')?.textContent?.replace('\\n', '')?.trim()
     const priceEl = document?.getElementsByClassName('a-price aok-align-center reinventPricePriceToPayMargin priceToPay')?.[0]
@@ -311,7 +310,7 @@ router.get('/generic/product', async (ctx) => {
     let document: HTMLDocument
     try {
       results = await cfetch(`${id}`, lang ?? 'en-US,en;q=0.5')
-      const tempDocument = new DOMParser().parseFromString(results, 'text/html');
+      const tempDocument = new DOMParser().parseFromString(results, 'text/html')
       if (tempDocument === null) throw new Error('Cannot load website.')
       document = tempDocument
     } catch (e) {
@@ -334,7 +333,6 @@ router.get('/generic/product', async (ctx) => {
     let ogPrice = ((getMeta(document, 'og:price:currency') == 'USD' || (getMeta(document, 'og:price:currency') === undefined && getMeta(document, 'og:price:amount'))) ? `$${getMeta(document, 'og:price:amount')}` : undefined)
     const regexPrices = results.match(/\$[\n\\n\s\t ]*?([0-9]+?\.?[0-9][0-9])/g)?.reverse() ?? []
     let regexPrice
-    console.log(regexPrices)
     for (const thep of regexPrices) {
       const thep2 = thep.replace('$', '').replace('\\', '').replace('n', '').replace('\n', '').replace(' ', '')
       if (regexPrice === undefined && thep2 !== '0.00' && thep2 !== '0' && thep.match(/[0]?/)?.[0] !== thep) {
@@ -400,6 +398,17 @@ router.get('/embed', async (ctx) => {
 
 const app = new Application()
 app.use(CORS({origin: '*'}))
+if (Deno.env.get('ENVIRONMENT') !== 'PRODUCTION') {
+  app.use(async (ctx, next) => {
+    const body = ctx.request.hasBody ? await ctx.request.body({type: 'json', limit: 0}).value : undefined
+    await next()
+    console.log('Request:')
+    console.log(ctx.request.method + ' ' + ctx.request.url)
+    console.log(body)
+    console.log('Response:')
+    console.log(ctx.response.body)
+  })
+}
 app.use(router.routes())
 app.use(router.allowedMethods())
 
